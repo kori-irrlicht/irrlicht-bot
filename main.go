@@ -11,6 +11,8 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
+const botTestChannel = "274304138953752578"
+
 var token string
 
 func init() {
@@ -43,9 +45,11 @@ func main() {
 	channels, _ := Session.GuildChannels("208374693185585152")
 	for _, channel := range channels {
 		if channel.Type == "text" {
-			Session.ChannelMessageSend(channel.ID, fmt.Sprintf("Dies ist der Channel %s.", channel.Name))
+			//Session.ChannelMessageSend(channel.ID, fmt.Sprintf("Dies ist der Channel %s.", channel.Name))
 		}
 	}
+
+	Session.AddHandler(messageCreateHandler)
 
 	log.Printf(`Now running. Press CTRL-C to exit.`)
 	sc := make(chan os.Signal, 1)
