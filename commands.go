@@ -19,5 +19,13 @@ func messageCreateHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		}
 
+		strAr := strings.Split(m.Content, " ")
+		str := strings.Replace(strAr[0], commandPrefix, "", 1)
+
+		switch str {
+		case "help":
+			s.ChannelMessageSend(m.ChannelID, "Hallo")
+		}
+
 	}
 }
