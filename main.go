@@ -9,14 +9,12 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/spf13/viper"
+	"github.com/yasvisu/gw2api"
 )
 
-const botTestChannel = "276738368749043712"
-
-var token string
-
-func init() {
-}
+var botTestChannel string
+var discordToken string
+var guildWars2Token string
 
 func main() {
 	viper.SetConfigType("yaml")
@@ -28,36 +26,18 @@ func main() {
 		fmt.Println(err)
 	}
 
-	token = viper.GetString("discordToken")
-
-	if token == "" {
-		fmt.Println("No token")
+	session, err := createDiscordSession()
+	if err != nil {
+		fmt.Println(err)
 		os.Exit(1)
 	}
-	Session, err := discordgo.New("Bot " + token)
+	api, err := createGuildWarsSession()
 	if err != nil {
-		fmt.Println("Can't create session", err)
+		fmt.Println(err)
+		os.Exit(2)
 	}
 
-	Session.State.User, err = Session.User("@me")
-	if err != nil {
-		fmt.Println("Error fetching user info", err)
-	}
-
-	err = Session.Open()
-	if err != nil {
-		fmt.Println("Error connecting to discord", err)
-	}
-
-	//Session.ChannelMessageSend("274304138953752578", "Hallo Welt")
-	channels, _ := Session.GuildChannels("208374693185585152")
-	for _, channel := range channels {
-		if channel.Type == "text" {
-			//Session.ChannelMessageSend(channel.ID, fmt.Sprintf("Dies ist der Channel %s.", channel.Name))
-		}
-	}
-
-	Session.AddHandler(messageCreateHandler)
+	_ = api
 
 	log.Printf(`Now running. Press CTRL-C to exit.`)
 	sc := make(chan os.Signal, 1)
@@ -65,6 +45,44 @@ func main() {
 	<-sc
 
 	// Clean up
-	Session.Close()
+	session.Close()
 
+}
+
+func createDiscordSession() (*discordgo.Session, error) {
+	discordToken = viper.GetString("discordToken")
+	if discordToken == "" {
+		return nil, fmt.Errorf("No discordToken")
+	}
+	Session, err := discordgo.New("Bot " + discordToken)
+	if err != nil {
+		fmt.Println("Can't create session", err)
+		return nil, err
+	}
+
+	Session.State.User, err = Session.User("@me")
+	if err != nil {
+		fmt.Println("Error fetching user info", err)
+		return nil, err
+	}
+
+	err = Session.Open()
+	if err != nil {
+		fmt.Println("Error connecting to discord", err)
+		return nil, err
+	}
+
+	Session.AddHandler(messageCreateHandler)
+	return Session, nil
+}
+
+func createGuildWarsSession() (*gw2api.GW2Api, error) {
+	guildWars2Token = viper.GetString("guildWars2Token")
+	api, err := gw2api.NewAuthenticatedGW2Api(guildWars2Token)
+	if err != nil {
+		fmt.Println("Can't create gw2api")
+		return nil, err
+	}
+
+	return api, nil
 }
