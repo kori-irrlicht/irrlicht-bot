@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -9,18 +8,27 @@ import (
 	"syscall"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/spf13/viper"
 )
 
-const botTestChannel = "274304138953752578"
+const botTestChannel = "276738368749043712"
 
 var token string
 
 func init() {
-	flag.StringVar(&token, "t", "", "Discord authentication token")
 }
 
 func main() {
-	flag.Parse()
+	viper.SetConfigType("yaml")
+	viper.SetConfigName("config")
+	viper.AddConfigPath("./")
+
+	err := viper.ReadInConfig()
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	token = viper.GetString("discordToken")
 
 	if token == "" {
 		fmt.Println("No token")
