@@ -79,13 +79,14 @@ func checkRuleEntry(s *discordgo.Session) (err error) {
 	}
 
 	if len(msgs) == 0 {
-		for i := 0; i < len(file); i += 2000 {
-
-			max := i + 2000
-			if max > len(file) {
+		max := 0
+		for i := 0; i < len(file); i += max {
+			max = i + 2000
+			if len(file) <= max {
 				max = len(file)
+			} else {
+				max = strings.LastIndex(string(file[:max]), "\n")
 			}
-
 			_, err := s.ChannelMessageSend(rules, string(file[i:max]))
 			if err != nil {
 				return err
