@@ -35,7 +35,7 @@ func messageCreateHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	user, _ := s.User("@me")
 	if m.Author.ID != user.ID {
 		ch, _ := s.Channel(m.ChannelID)
-		if ch.Name == regelChan && !strings.HasPrefix(m.Content, commandPrefix) {
+		if ch.Name == regelChan {
 			s.ChannelMessageDelete(ch.ID, m.ID)
 			return
 		}
@@ -53,7 +53,6 @@ func messageCreateHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			}
 			comm, ok = ruleCommands[str]
 			if !ok {
-				s.ChannelMessageDelete(ch.ID, m.ID)
 				return
 			}
 		}
